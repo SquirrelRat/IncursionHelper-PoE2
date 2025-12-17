@@ -32,6 +32,12 @@ public class Settings : ISettings
 
     [Menu("Reward Text Scale", 10)]
     public RangeNode<float> RewardTextScale { get; set; } = new RangeNode<float>(1.0f, 0.5f, 3.0f);
+
+    [Menu("Use Multi-Color Upgrades", "Use different colors for different upgrade chains")]
+    public ToggleNode UseMultiColorUpgrades { get; set; } = new ToggleNode(true);
+
+    [Menu("Show Upgrade Lines")]
+    public ToggleNode ShowUpgradeLines { get; set; } = new ToggleNode(true);
     
     [Menu("Activated Color")]
     public ColorNode ActivatedColor { get; set; } = new ColorNode(Color.FromArgb(128, 0, 255, 0));
