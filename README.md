@@ -34,6 +34,14 @@ During the Incursion encounter, the plugin visualizes the Altar activation progr
 
 ---
 
+
+### 4. Upgrade Suggestions
+Upgrade helper to show you where cards and tiles match to upgrade different tiles on the board.
+  
+<img width="987" height="384" alt="image" src="https://github.com/user-attachments/assets/6c07544a-0e63-406f-a41b-153c4c330076" />
+
+---
+
 ## Installation
 
 1.  Download the plugin source.
