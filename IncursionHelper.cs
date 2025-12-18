@@ -116,98 +116,97 @@ namespace IncursionHelper
             { "Regal", new RewardInfo { Title = "Regal Bench", Description = "Magic -> Rare" } }
         };
 
-        private static readonly Dictionary<string, (string Text, Color Color)> _roomNameMapping = new()
-        {
-            { "Crimson Hall", ("Corrupt", Color.Red) },
-            { "Catalyst of Corruption", ("Corrupt", Color.Red) },
-            { "Locus of Corruption", ("Corrupt", Color.Red) },
-            { "Thaumaturge's Laboratory", ("Gem Corrupt", Color.Red) },
-            { "Thaumaturge's Cuttery", ("Gem Corrupt", Color.Red) },
-            { "Thaumaturge's Cathedral", ("Gem Corrupt", Color.Red) },
-            { "Chamber of Souls", ("Soul Core Corrupt", Color.Red) },
-            { "Core Machinarium", ("Soul Core Corrupt", Color.Red) },
-            { "Grand Phylactory", ("Soul Core Corrupt", Color.Red) },
-            { "Tablet Research Vault", ("Tablet Corrupt", Color.Red) },
-            { "Altar of Sacrifice", ("Unique Item", Color.Orange) },
-            { "Hall of Offerings", ("Unique Item", Color.Orange) },
-            { "Apex of Oblation", ("Unique Item", Color.Orange) },
-            { "Ancient Reliquary Vault", ("Unique Item", Color.Orange) },
-            { "Kishara's Vault", ("Currency", Color.Gold) },
-            { "Jiquani's Vault", ("High Lvl Rune", Color.Cyan) },
-            { "Vault of Reverence", ("Lineage Gem", Color.Cyan) },
-            { "Commander's Chamber", ("Uromoti", Color.Wheat) },
-            { "Commander's Hall", ("Uromoti", Color.Wheat) },
-            { "Commander's Headquarters", ("Uromoti", Color.Wheat) },
-            { "Spymaster's Study", ("Juatalotli", Color.Wheat) },
-            { "Hall of Shadows", ("Juatalotli", Color.Wheat) },
-            { "Omnipresent Panopticon", ("Juatalotli", Color.Wheat) },
-            { "Workshop", ("Quipolatl", Color.Wheat) },
-            { "Automaton Lab", ("Quipolatl", Color.Wheat) },
-            { "Stone Legion", ("Quipolatl", Color.Wheat) },
-            { "Architect's Chamber", ("Xopec/Azcapa", Color.Wheat) },
-            { "Chamber of Iron", ("Quality Bench", Color.LightGray) },
-            { "Golden Forge", ("Quality Bench", Color.LightGray) },
-            { "Dynamo", ("Power/Bench", Color.LightGray) },
-            { "Shrine of Empowerment", ("Power/Bench", Color.LightGray) },
-            { "Solar Nexus", ("Power/Bench", Color.LightGray) },
-            { "Surgeon's Ward", ("Limb Mod", Color.LightGray) },
-            { "Surgeon's Theatre", ("Limb Mod", Color.LightGray) },
-            { "Surgeon's Symphony", ("Limb Mod", Color.LightGray) },
-            { "Extraction Chamber", ("Extract Augments", Color.LightGray) },
-            { "Royal Access Chamber", ("Access Atziri", Color.Magenta) },
-            { "Atziri's Chamber", ("Atziri", Color.Magenta) },
-            { "Sacrifice Room", ("Sacrifice Room", Color.Magenta) },
+        private record RoomDef(string Name, string Type, string Overlay, Color Color, bool IsMaxTier = false);
 
-            { "Path", ("Path", Color.LightGray) },
-            { "Guardhouse", ("Guardhouse", Color.LightGray) },
-            { "Barracks", ("Barracks", Color.LightGray) },
-            { "Hall of War", ("Hall of War", Color.LightGray) },
-            { "Depot", ("Depot", Color.LightGray) },
-            { "Arsenal", ("Arsenal", Color.LightGray) },
-            { "Gallery", ("Gallery", Color.LightGray) },
-            { "Bronzeworks", ("Bronzeworks", Color.LightGray) },
-            { "Prosthetic Research", ("Prosthetic Research", Color.LightGray) },
-            { "Synthflesh Sanctum", ("Synthflesh Sanctum", Color.LightGray) },
-            { "Crucible of Transcendence", ("Crucible of Transcendence", Color.LightGray) },
-            { "Viper's Loyals", ("Viper's Loyals", Color.LightGray) },
-            { "Elite Legion", ("Elite Legion", Color.LightGray) },
-            { "Steelflesh Quarters", ("Steelflesh Quarters", Color.LightGray) },
-            { "Collective Legion", ("Collective Legion", Color.LightGray) },
-            { "Foyer", ("Foyer", Color.LightGray) },
-            { "Sealed Vault", ("Sealed Vault", Color.LightGray) },
+        private static readonly List<RoomDef> _roomDefinitions = new()
+        {
+            new("Crimson Hall", "Corruption Chamber", "Corrupt", Color.Red),
+            new("Catalyst of Corruption", "Corruption Chamber", "Corrupt", Color.Red),
+            new("Locus of Corruption", "Corruption Chamber", "Corrupt", Color.Red, true),
+            
+            new("Thaumaturge's Laboratory", "Thaumaturge", "Gem Corrupt", Color.Red),
+            new("Thaumaturge's Cuttery", "Thaumaturge", "Gem Corrupt", Color.Red),
+            new("Thaumaturge's Cathedral", "Thaumaturge", "Gem Corrupt", Color.Red, true),
+
+            new("Chamber of Souls", "Alchemy Lab", "Soul Core Corrupt", Color.Red),
+            new("Core Machinarium", "Alchemy Lab", "Soul Core Corrupt", Color.Red),
+            new("Grand Phylactory", "Alchemy Lab", "Soul Core Corrupt", Color.Red, true),
+
+            new("Tablet Research Vault", "Tablets Vault", "Tablet Corrupt", Color.Red),
+            
+            new("Altar of Sacrifice", "Sacrificial Chamber", "Unique Item", Color.Orange),
+            new("Hall of Offerings", "Sacrificial Chamber", "Unique Item", Color.Orange),
+            new("Apex of Oblation", "Sacrificial Chamber", "Unique Item", Color.Orange, true),
+            new("Ancient Reliquary Vault", "Uniques Vault", "Unique Item", Color.Orange),
+            
+            new("Kishara's Vault", "Currency Vault", "Currency", Color.Gold),
+            new("Jiquani's Vault", "Augments Vault", "High Lvl Rune", Color.Cyan),
+            new("Vault of Reverence", "Lineage Gems Vault", "Lineage Gem", Color.Cyan),
+            
+            new("Commander's Chamber", "Commander", "Uromoti", Color.Wheat),
+            new("Commander's Hall", "Commander", "Uromoti", Color.Wheat),
+            new("Commander's Headquarters", "Commander", "Uromoti", Color.Wheat, true),
+            
+            new("Spymaster's Study", "Spymaster", "Juatalotli", Color.Wheat),
+            new("Hall of Shadows", "Spymaster", "Juatalotli", Color.Wheat),
+            new("Omnipresent Panopticon", "Spymaster", "Juatalotli", Color.Wheat, true),
+            
+            new("Workshop", "Golem Works", "Quipolatl", Color.Wheat),
+            new("Automaton Lab", "Golem Works", "Quipolatl", Color.Wheat),
+            new("Stone Legion", "Golem Works", "Quipolatl", Color.Wheat, true),
+            
+            new("Architect's Chamber", "Architect's Chamber", "Xopec/Azcapa", Color.Wheat),
+
+            new("Chamber of Iron", "Smithy", "Quality Bench", Color.LightGray),
+            new("Golden Forge", "Smithy", "Quality Bench", Color.LightGray, true),
+            
+            new("Dynamo", "Generator", "Power/Bench", Color.LightGray),
+            new("Shrine of Empowerment", "Generator", "Power/Bench", Color.LightGray),
+            new("Solar Nexus", "Generator", "Power/Bench", Color.LightGray, true),
+            
+            new("Surgeon's Ward", "Flesh Surgeon", "Limb Mod", Color.LightGray),
+            new("Surgeon's Theatre", "Flesh Surgeon", "Limb Mod", Color.LightGray),
+            new("Surgeon's Symphony", "Flesh Surgeon", "Limb Mod", Color.LightGray, true),
+            
+            new("Extraction Chamber", "Extraction Chamber", "Extract Augments", Color.LightGray),
+            
+            new("Royal Access Chamber", "Royal Access Chamber", "Access Atziri", Color.Magenta),
+            new("Atziri's Chamber", "Atziri's Chamber", "Atziri", Color.Magenta),
+            new("Sacrifice Room", "Sacrifice Room", "Sacrifice Room", Color.Magenta),
+
+            new("Path", "Path", "", Color.LightGray),
+            new("Guardhouse", "Garrison", "Equip Mod", Color.LightGray),
+            new("Barracks", "Garrison", "Equip Mod", Color.LightGray),
+            new("Hall of War", "Garrison", "Equip Mod", Color.LightGray, true),
+            
+            new("Depot", "Armoury", "Equipment", Color.LightGray),
+            new("Arsenal", "Armoury", "Equipment", Color.LightGray),
+            new("Gallery", "Armoury", "Equipment", Color.LightGray, true),
+            
+            new("Bronzeworks", "Smithy", "Quality Bench", Color.LightGray),
+            
+            new("Prosthetic Research", "Synthflesh Lab", "Experience", Color.LightGray),
+            new("Synthflesh Sanctum", "Synthflesh Lab", "Experience", Color.LightGray),
+            new("Crucible of Transcendence", "Synthflesh Lab", "Experience", Color.LightGray, true),
+            
+            new("Viper's Loyals", "Legion Barracks", "Rare Monsters", Color.LightGray),
+            new("Elite Legion", "Legion Barracks", "Rare Monsters", Color.LightGray, true),
+            
+            new("Steelflesh Quarters", "Transcendent Barracks", "Magic Monsters", Color.LightGray),
+            new("Collective Legion", "Transcendent Barracks", "Magic Monsters", Color.LightGray, true),
+            
+            new("Foyer", "Entrance", "", Color.LightGray),
+            new("Sealed Vault", "Treasure Vault", "Chests", Color.LightGray),
         };
 
-        private static readonly Dictionary<string, string> _roomTypes = new()
-        {
-            { "Guardhouse", "Garrison" }, { "Barracks", "Garrison" }, { "Hall of War", "Garrison" },
-            { "Commander's Chamber", "Commander" }, { "Commander's Hall", "Commander" }, { "Commander's Headquarters", "Commander" },
-            { "Depot", "Armoury" }, { "Arsenal", "Armoury" }, { "Gallery", "Armoury" },
-            { "Bronzeworks", "Smithy" }, { "Chamber of Iron", "Smithy" }, { "Golden Forge", "Smithy" },
-            { "Dynamo", "Generator" }, { "Shrine of Empowerment", "Generator" }, { "Solar Nexus", "Generator" },
-            { "Spymaster's Study", "Spymaster" }, { "Hall of Shadows", "Spymaster" }, { "Omnipresent Panopticon", "Spymaster" },
-            { "Viper's Loyals", "Legion Barracks" }, { "Elite Legion", "Legion Barracks" },
-            { "Prosthetic Research", "Synthflesh Lab" }, { "Synthflesh Sanctum", "Synthflesh Lab" }, { "Crucible of Transcendence", "Synthflesh Lab" },
-            { "Surgeon's Ward", "Flesh Surgeon" }, { "Surgeon's Theatre", "Flesh Surgeon" }, { "Surgeon's Symphony", "Flesh Surgeon" },
-            { "Steelflesh Quarters", "Transcendent Barracks" }, { "Collective Legion", "Transcendent Barracks" },
-            { "Chamber of Souls", "Alchemy Lab" }, { "Core Machinarium", "Alchemy Lab" }, { "Grand Phylactory", "Alchemy Lab" },
-            { "Thaumaturge's Laboratory", "Thaumaturge" }, { "Thaumaturge's Cuttery", "Thaumaturge" }, { "Thaumaturge's Cathedral", "Thaumaturge" },
-            { "Workshop", "Golem Works" }, { "Automaton Lab", "Golem Works" }, { "Stone Legion", "Golem Works" },
-            { "Crimson Hall", "Corruption Chamber" }, { "Catalyst of Corruption", "Corruption Chamber" }, { "Locus of Corruption", "Corruption Chamber" },
-            { "Sealed Vault", "Treasure Vault" },
-            { "Altar of Sacrifice", "Sacrificial Chamber" }, { "Hall of Offerings", "Sacrificial Chamber" }, { "Apex of Oblation", "Sacrificial Chamber" },
-            { "Architect's Chamber", "Architect's Chamber" },
-            { "Foyer", "Entrance" },
-            { "Kishara's Vault", "Currency Vault" },
-            { "Vault of Reverence", "Lineage Gems Vault" },
-            { "Jiquani's Vault", "Augments Vault" },
-            { "Tablet Research Vault", "Tablets Vault" },
-            { "Ancient Reliquary Vault", "Uniques Vault" },
-            { "Royal Access Chamber", "Royal Access Chamber" },
-            { "Extraction Chamber", "Extraction Chamber" },
-            { "Atziri's Chamber", "Atziri's Chamber" },
-            { "Sacrifice Room", "Sacrifice Room" },
-            { "Path", "Path" }
-        };
+        private static readonly Dictionary<string, (string Text, Color Color)> _roomNameMapping = 
+            _roomDefinitions.ToDictionary(r => r.Name, r => (r.Overlay, r.Color));
+
+        private static readonly Dictionary<string, string> _roomTypes = 
+            _roomDefinitions.ToDictionary(r => r.Name, r => r.Type);
+
+        private static readonly HashSet<string> _maxTierRooms = 
+            _roomDefinitions.Where(r => r.IsMaxTier).Select(r => r.Name).ToHashSet();
 
         private static readonly Dictionary<string, List<string>> _upgradedBy = new()
         {
@@ -316,11 +315,18 @@ namespace IncursionHelper
                 .OrderBy(p => p.ActivatedSeq)
                 .ToList();
 
-            if (Settings.ShowCircles) RenderCircles();
-            if (Settings.ShowConnections) RenderConnections(activatedSequence);
-            if (Settings.ShowNumbers) RenderNumbers(activatedSequence);
+            var activatedCount = activatedSequence.Count;
+            var totalCount = _pedestals.Count;
+            var isComplete = totalCount > 0 && activatedCount == totalCount;
+
+            if (!isComplete)
+            {
+                if (Settings.ShowCircles) RenderCircles();
+                if (Settings.ShowConnections) RenderConnections(activatedSequence);
+                if (Settings.ShowNumbers) RenderNumbers(activatedSequence);
+            }
             
-            RenderMainIncursionText(activatedSequence.Count);
+            RenderMainIncursionText(activatedCount, totalCount, isComplete);
             
             if (Settings.ShowRewards) 
             {
@@ -375,18 +381,31 @@ namespace IncursionHelper
             }
         }
 
-        private void RenderMainIncursionText(int activatedCount)
+        private void RenderMainIncursionText(int activatedCount, int totalCount, bool isComplete)
         {
             if (_altarEntity == null) return;
             var pos = GameController.IngameState.Camera.WorldToScreen(_altarEntity.Pos);
             if (pos == Vector2.Zero) return;
 
-            var text = $"Incursion: {activatedCount}/{_pedestals.Count}";
+            string text;
+            Color color;
+
+            if (isComplete)
+            {
+                text = "COMPLETE";
+                color = Color.LimeGreen;
+            }
+            else
+            {
+                text = $"Incursion: {activatedCount}/{totalCount}";
+                color = Color.White;
+            }
+
             var size = Graphics.MeasureText(text);
             var drawPos = pos - size / 2;
             
             Graphics.DrawBox(new RectangleF(drawPos.X - 8, drawPos.Y - 8, size.X + 16, size.Y + 16), Color.FromArgb(180, 0, 0, 0));
-            Graphics.DrawText(text, drawPos, Color.White);
+            Graphics.DrawText(text, drawPos, color);
         }
 
         private void RenderCircles()
@@ -556,6 +575,9 @@ namespace IncursionHelper
                         {
                              if (_cachedTileOverlays.Values.Any(ov => ov.Id == target))
                              {
+                                 // Skip if the target is already max tier
+                                 if (_maxTierRooms.Contains(target)) continue;
+
                                  if (!targetColors.ContainsKey(target))
                                  {
                                      targetColors[target] = color;
@@ -592,14 +614,20 @@ namespace IncursionHelper
 
                 if (_roomNameMapping.TryGetValue(roomName, out var reward))
                 {
-                    linesToDraw.Add((reward.Text, reward.Color, null));
+                    if (!string.IsNullOrEmpty(reward.Text))
+                    {
+                        linesToDraw.Add((reward.Text, reward.Color, null));
+                    }
                 }
 
                 if (_roomTypes.TryGetValue(roomName, out var type) && 
                     typeColors.TryGetValue(type, out var typeColor) && 
                     _upgradedBy.TryGetValue(type, out var targets))
                 {
-                    var presentUpgrades = targets.Where(t => _cachedTileOverlays.Values.Any(ov => ov.Id == t)).ToList();
+                    var presentUpgrades = targets
+                        .Where(t => _cachedTileOverlays.Values.Any(ov => ov.Id == t) && !_maxTierRooms.Contains(t))
+                        .ToList();
+
                     foreach (var target in presentUpgrades)
                     {
                         linesToDraw.Add(($"Upgrades: {target}", typeColor, target));
