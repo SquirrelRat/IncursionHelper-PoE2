@@ -65,5 +65,8 @@ public class Settings : ISettings
     
     [Menu("Number Scale")]
     public RangeNode<float> NumberScale { get; set; } = new RangeNode<float>(1.0f, 0.5f, 2.0f);
+
+    [Menu("Auto-hide on Hover", "Hide overlays when hovering a tile with a tooltip")]
+    public ToggleNode AutoHideOnHover { get; set; } = new ToggleNode(true);
 }
 }

@@ -124,13 +124,13 @@ namespace IncursionHelper
             new("Catalyst of Corruption", "Corruption Chamber", "Corrupt", Color.Red),
             new("Locus of Corruption", "Corruption Chamber", "Corrupt", Color.Red, true),
             
-            new("Thaumaturge's Laboratory", "Thaumaturge", "Gem Corrupt", Color.Red),
-            new("Thaumaturge's Cuttery", "Thaumaturge", "Gem Corrupt", Color.Red),
+            new("Thaumaturge's Laboratory", "Thaumaturge", "3-Link Gem", Color.Red),
+            new("Thaumaturge's Cuttery", "Thaumaturge", "Gem Quality", Color.Red),
             new("Thaumaturge's Cathedral", "Thaumaturge", "Gem Corrupt", Color.Red, true),
 
-            new("Chamber of Souls", "Alchemy Lab", "Soul Core Corrupt", Color.Red),
-            new("Core Machinarium", "Alchemy Lab", "Soul Core Corrupt", Color.Red),
-            new("Grand Phylactory", "Alchemy Lab", "Soul Core Corrupt", Color.Red, true),
+            new("Chamber of Souls", "Alchemy Lab", "Rarity + Medallion", Color.Red),
+            new("Core Machinarium", "Alchemy Lab", "Rarity + Medallion", Color.Red),
+            new("Grand Phylactory", "Alchemy Lab", "Corrupt Soul Core", Color.Red, true),
 
             new("Tablet Research Vault", "Tablets Vault", "Tablet Corrupt", Color.Red),
             
@@ -157,8 +157,9 @@ namespace IncursionHelper
             
             new("Architect's Chamber", "Architect's Chamber", "Xopec/Azcapa", Color.Wheat),
 
-            new("Chamber of Iron", "Smithy", "Quality Bench", Color.LightGray),
-            new("Golden Forge", "Smithy", "Quality Bench", Color.LightGray, true),
+            new("Bronzeworks", "Smithy", "Quality Bench", Color.LightGray),
+            new("Chamber of Iron", "Smithy", "Socket Bench", Color.LightGray),
+            new("Golden Forge", "Smithy", "Quality >20%", Color.LightGray, true),
             
             new("Dynamo", "Generator", "Power/Bench", Color.LightGray),
             new("Shrine of Empowerment", "Generator", "Power/Bench", Color.LightGray),
@@ -183,8 +184,6 @@ namespace IncursionHelper
             new("Arsenal", "Armoury", "Equipment", Color.LightGray),
             new("Gallery", "Armoury", "Equipment", Color.LightGray, true),
             
-            new("Bronzeworks", "Smithy", "Quality Bench", Color.LightGray),
-            
             new("Prosthetic Research", "Synthflesh Lab", "Experience", Color.LightGray),
             new("Synthflesh Sanctum", "Synthflesh Lab", "Experience", Color.LightGray),
             new("Crucible of Transcendence", "Synthflesh Lab", "Experience", Color.LightGray, true),
@@ -208,6 +207,28 @@ namespace IncursionHelper
         private static readonly HashSet<string> _maxTierRooms = 
             _roomDefinitions.Where(r => r.IsMaxTier).Select(r => r.Name).ToHashSet();
 
+        private static readonly Dictionary<string, Color> _medallionColors = new()
+        {
+            { "Juatalotli", Color.LightGreen },
+            { "Hayoxi", Color.Yellow },
+            { "Quipolatl", Color.Magenta },
+            { "Uromoti", Color.Orange },
+            { "Xopec", Color.Blue },
+            { "Azcapa", Color.Cyan },
+            { "Estazunti", Color.Gold }
+        };
+
+        private static readonly Dictionary<string, string> _medallionDescriptions = new()
+        {
+            { "Juatalotli", "Prevent next Destabilisation" },
+            { "Hayoxi", "Reroll Reward Vault reward" },
+            { "Quipolatl", "Improve Room Tier" },
+            { "Uromoti", "Add Room" },
+            { "Xopec", "Increase Max Crystal Capacity" },
+            { "Azcapa", "Increase Max Medallion Capacity" },
+            { "Estazunti", "Extra Reward Vault" }
+        };
+
         private static readonly Dictionary<string, List<string>> _upgradedBy = new()
         {
             { "Commander", new List<string> { "Guardhouse", "Barracks", "Hall of War" } },
@@ -215,7 +236,6 @@ namespace IncursionHelper
             { "Garrison", new List<string> { "Commander's Chamber", "Commander's Hall", "Commander's Headquarters" } },
             { "Transcendent Barracks", new List<string> { "Commander's Chamber", "Commander's Hall", "Commander's Headquarters" } },
             { "Smithy", new List<string> { "Depot", "Arsenal", "Gallery" } },
-            { "Alchemy Lab", new List<string> { "Depot", "Arsenal", "Gallery" } },
             { "Golem Works", new List<string> { "Bronzeworks", "Chamber of Iron", "Golden Forge" } },
             { "Thaumaturge", new List<string> { "Dynamo", "Shrine of Empowerment", "Solar Nexus", "Chamber of Souls", "Core Machinarium", "Grand Phylactory", "Crimson Hall", "Catalyst of Corruption", "Locus of Corruption" } },
             { "Sacrificial Chamber", new List<string> { "Dynamo", "Shrine of Empowerment", "Solar Nexus", "Thaumaturge's Laboratory", "Thaumaturge's Cuttery", "Thaumaturge's Cathedral", "Crimson Hall", "Catalyst of Corruption", "Locus of Corruption" } },
@@ -371,12 +391,23 @@ namespace IncursionHelper
                 var label = labelEntity.Label;
                 if (label == null || !label.IsVisible) continue;
 
-                var foundTextElement = FindTextElement(label, "Medallion");
+                var fullText = CollectAllText(label);
+                if (string.IsNullOrEmpty(fullText)) continue;
 
-                if (foundTextElement != null)
+                if (fullText.Contains("Medallion"))
                 {
+                    var color = Color.Aqua; // Default
+                    foreach (var kvp in _medallionColors)
+                    {
+                        if (fullText.Contains(kvp.Key))
+                        {
+                            color = kvp.Value;
+                            break;
+                        }
+                    }
+
                     var rect = label.GetClientRect();
-                    Graphics.DrawFrame(rect, Color.Aqua, 3);
+                    Graphics.DrawFrame(rect, color, 3);
                 }
             }
         }
@@ -505,6 +536,26 @@ namespace IncursionHelper
 
             var (typeColors, targetColors) = AssignUpgradeColors(panel);
             var tilePositions = new Dictionary<string, List<Vector2>>();
+            
+            bool isAnyTileHovered = false;
+            if (Settings.AutoHideOnHover.Value)
+            {
+                foreach (var tile in tilesContainer.Children)
+                {
+                    if (tile.IsVisible && tile.HasShinyHighlight && tile.Tooltip != null)
+                    {
+                        if (_cachedTileOverlays.TryGetValue(tile.Address, out var info))
+                        {
+                            var isGenericWithNoText = info.Color == Color.LightGray && string.IsNullOrEmpty(info.Text);
+                            if (!isGenericWithNoText)
+                            {
+                                isAnyTileHovered = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
 
             foreach (var tile in tilesContainer.Children)
             {
@@ -520,7 +571,7 @@ namespace IncursionHelper
                     
                     info.IsUpgradeTarget = upgradeColor.HasValue;
                     
-                    var tileRect = DrawTileOverlay(tile, info, upgradeColor);
+                    var tileRect = DrawTileOverlay(tile, info, upgradeColor, isAnyTileHovered);
 
                     if (info.IsUpgradeTarget && tileRect != RectangleF.Empty)
                     {
@@ -533,7 +584,94 @@ namespace IncursionHelper
                 }
             }
 
-            RenderRoomCards(panel, typeColors, tilePositions);
+            RenderRoomCards(panel, typeColors, tilePositions, isAnyTileHovered);
+            RenderMedallionCards(panel);
+        }
+
+        private void RenderMedallionCards(Element panel)
+        {
+            if (panel.Children.Count <= 11) return;
+            var containerL1 = panel.Children[11];
+            
+            if (containerL1 == null || containerL1.Children.Count <= 2) return;
+            var cardsContainer = containerL1.Children[2];
+            
+            if (cardsContainer == null || cardsContainer.Children == null) return;
+
+            for (int i = 0; i < cardsContainer.Children.Count; i++)
+            {
+                var card = cardsContainer.Children[i];
+                if (!card.IsVisible) continue;
+
+                var allText = CollectAllText(card);
+                
+                if (card.Tooltip != null)
+                {
+                    allText += Environment.NewLine + CollectAllText(card.Tooltip);
+                }
+
+                if (string.IsNullOrEmpty(allText)) continue;
+
+                var cardRect = card.GetClientRect();
+                string description = null;
+                Color color = Color.White;
+
+                var match = Regex.Match(allText, @"Use to add Room:[\s\r\n]+([^\r\n]+)");
+                if (match.Success)
+                {
+                    var roomName = match.Groups[1].Value.Trim();
+                    var endLine = roomName.IndexOfAny(new[] { '\r', '\n' });
+                    if (endLine > 0) roomName = roomName.Substring(0, endLine).Trim();
+
+                    description = $"Adds: {roomName}";
+                    
+                    var roomDef = _roomDefinitions.FirstOrDefault(r => r.Name.Equals(roomName, StringComparison.OrdinalIgnoreCase));
+                    if (roomDef == null)
+                    {
+                        roomDef = _roomDefinitions.FirstOrDefault(r => r.Type.Equals(roomName, StringComparison.OrdinalIgnoreCase));
+                    }
+
+                    if (roomDef != null)
+                    {
+                        color = roomDef.Color;
+                    }
+                    else
+                    {
+                        color = Color.Orange;
+                    }
+                }
+
+                if (description == null)
+                {
+                    foreach (var kvp in _medallionDescriptions)
+                    {
+                        if (allText.Contains(kvp.Key))
+                        {
+                            description = kvp.Value;
+                            if (_medallionColors.TryGetValue(kvp.Key, out var c)) color = c;
+                            break;
+                        }
+                    }
+                }
+
+                if (description != null)
+                {
+                    var textSize = Graphics.MeasureText(description);
+                    var windowRect = GameController.Window.GetWindowRectangle();
+                    
+                    var drawPos = new Vector2(cardRect.Right + 10, cardRect.Center.Y - textSize.Y / 2);
+                    
+                    if (drawPos.X + textSize.X > windowRect.Width - 10)
+                    {
+                        drawPos.X = cardRect.Left - 10 - textSize.X;
+                    }
+
+                    var bgRect = new RectangleF(drawPos.X - 2, drawPos.Y - 2, textSize.X + 4, textSize.Y + 4);
+                    
+                    Graphics.DrawBox(bgRect, Color.Black);
+                    Graphics.DrawText(description, drawPos, color);
+                }
+            }
         }
 
         private (Dictionary<string, Color> TypeColors, Dictionary<string, Color> TargetColors) AssignUpgradeColors(Element panel)
@@ -575,7 +713,6 @@ namespace IncursionHelper
                         {
                              if (_cachedTileOverlays.Values.Any(ov => ov.Id == target))
                              {
-                                 // Skip if the target is already max tier
                                  if (_maxTierRooms.Contains(target)) continue;
 
                                  if (!targetColors.ContainsKey(target))
@@ -590,7 +727,7 @@ namespace IncursionHelper
             return (typeColors, targetColors);
         }
 
-        private void RenderRoomCards(Element panel, Dictionary<string, Color> typeColors, Dictionary<string, List<Vector2>> tilePositions)
+        private void RenderRoomCards(Element panel, Dictionary<string, Color> typeColors, Dictionary<string, List<Vector2>> tilePositions, bool isAnyTileHovered)
         {
             if (panel.Children.Count <= 9) return;
             var containerL1 = panel.Children[9];
@@ -634,6 +771,27 @@ namespace IncursionHelper
                     }
                 }
 
+                var upgraderEntry = _upgradedBy.FirstOrDefault(x => x.Value.Contains(roomName));
+                if (!string.IsNullOrEmpty(upgraderEntry.Key))
+                {
+                    var upgraderType = upgraderEntry.Key;
+                    var isUpgraderPresent = _cachedTileOverlays.Values.Any(ov => 
+                        _roomTypes.TryGetValue(ov.Id, out var existingType) && existingType == upgraderType);
+
+                    if (isUpgraderPresent)
+                    {
+                        Color upgraderColor = Color.Yellow;
+                        if (typeColors.TryGetValue(upgraderType, out var c)) upgraderColor = c;
+                        else
+                        {
+                            var def = _roomDefinitions.FirstOrDefault(r => r.Type == upgraderType);
+                            if (def != null) upgraderColor = def.Color;
+                        }
+
+                        linesToDraw.Add(($"Upgraded by: {upgraderType}", upgraderColor, upgraderType));
+                    }
+                }
+
                 if (linesToDraw.Count == 0) continue;
 
                 float totalHeight = 0;
@@ -655,12 +813,15 @@ namespace IncursionHelper
                     Graphics.DrawBox(bgRect, Color.Black);
                     Graphics.DrawText(line.Text, drawPos, line.Color);
                     
-                    if (Settings.ShowUpgradeLines && line.TargetId != null && tilePositions.TryGetValue(line.TargetId, out var positions))
+                    if (Settings.ShowUpgradeLines && !isAnyTileHovered && line.TargetId != null)
                     {
-                        var startPoint = new Vector2(bgRect.Right, bgRect.Center.Y);
-                        foreach (var endPoint in positions)
+                        if (tilePositions.TryGetValue(line.TargetId, out var positions))
                         {
-                            Graphics.DrawLine(startPoint, endPoint, 2, Color.FromArgb(150, line.Color));
+                            var startPoint = new Vector2(bgRect.Right, bgRect.Center.Y);
+                            foreach (var endPoint in positions)
+                            {
+                                Graphics.DrawLine(startPoint, endPoint, 2, Color.FromArgb(150, line.Color));
+                            }
                         }
                     }
 
@@ -688,11 +849,11 @@ namespace IncursionHelper
             }
         }
 
-        private RectangleF DrawTileOverlay(Element tile, TileOverlayInfo info, Color? upgradeColor)
+        private RectangleF DrawTileOverlay(Element tile, TileOverlayInfo info, Color? upgradeColor, bool isAnyTileHovered)
         {
             var isGeneric = info.Color == Color.LightGray;
 
-            if (isGeneric && !info.IsUpgradeTarget) return RectangleF.Empty;
+            if (isGeneric && !info.IsUpgradeTarget && string.IsNullOrEmpty(info.Text)) return RectangleF.Empty;
 
             var displayColor = upgradeColor ?? info.Color;
             
@@ -705,8 +866,12 @@ namespace IncursionHelper
             var drawPos = new Vector2(center.X - textSize.X / 2, rect.Bottom - 15);
             
             var bgRect = new RectangleF(drawPos.X - 2, drawPos.Y - 2, textSize.X + 4, textSize.Y + 4);
-            Graphics.DrawBox(bgRect, Color.Black);
-            Graphics.DrawText(displayText, drawPos, displayColor);
+            
+            if (!isAnyTileHovered)
+            {
+                Graphics.DrawBox(bgRect, Color.Black);
+                Graphics.DrawText(displayText, drawPos, displayColor);
+            }
 
             return bgRect;
         }
