@@ -10,6 +10,7 @@ using ExileCore2.PoEMemory;
 using ExileCore2.PoEMemory.Components;
 using ExileCore2.PoEMemory.MemoryObjects;
 using ExileCore2.Shared.Helpers;
+using Input = ExileCore2.Input;
 using RectangleF = ExileCore2.Shared.RectangleF;
 
 namespace IncursionHelper
@@ -396,7 +397,7 @@ namespace IncursionHelper
 
                 if (fullText.Contains("Medallion"))
                 {
-                    var color = Color.Aqua; // Default
+                    var color = Color.Aqua;
                     foreach (var kvp in _medallionColors)
                     {
                         if (fullText.Contains(kvp.Key))
@@ -459,13 +460,20 @@ namespace IncursionHelper
             var r = Settings.CircleRadius.Value;
             var t = Settings.CircleThickness.Value;
 
+            Vector2? altarPos = null;
+            if (_altarEntity != null)
+            {
+                var sPos = GameController.IngameState.Camera.WorldToScreen(_altarEntity.Pos);
+                if (sPos != Vector2.Zero) altarPos = sPos;
+            }
+
             foreach (var p in _pedestals)
             {
                 if (p.QueuePosition > 0 && p.ScreenPosition != Vector2.Zero)
                 {
                     var prev = _pedestals.FirstOrDefault(x => x.ActivatedSeq == p.QueuePosition);
                     if (prev != null && prev.ScreenPosition != Vector2.Zero)
-                        DrawLineEdgeToEdge(prev.ScreenPosition, p.ScreenPosition, r, t, Settings.ActivatedColor);
+                        DrawCurve(prev.ScreenPosition, p.ScreenPosition, r, t, Settings.ActivatedColor, altarPos);
                 }
             }
 
@@ -484,7 +492,7 @@ namespace IncursionHelper
             {
                 if (current != null && current.ScreenPosition != Vector2.Zero && next.ScreenPosition != Vector2.Zero)
                 {
-                    DrawLineEdgeToEdge(current.ScreenPosition, next.ScreenPosition, r, t, Settings.NotActivatedColor);
+                    DrawCurve(current.ScreenPosition, next.ScreenPosition, r, t, Settings.NotActivatedColor, altarPos);
                 }
                 current = next;
             }
@@ -537,20 +545,22 @@ namespace IncursionHelper
             var (typeColors, targetColors) = AssignUpgradeColors(panel);
             var tilePositions = new Dictionary<string, List<Vector2>>();
             
-            bool isAnyTileHovered = false;
+            string hoveredRoomName = null;
             if (Settings.AutoHideOnHover.Value)
             {
                 foreach (var tile in tilesContainer.Children)
                 {
-                    if (tile.IsVisible && tile.HasShinyHighlight && tile.Tooltip != null)
+                    if (tile.IsVisible && tile.HasShinyHighlight)
                     {
                         if (_cachedTileOverlays.TryGetValue(tile.Address, out var info))
                         {
                             var isGenericWithNoText = info.Color == Color.LightGray && string.IsNullOrEmpty(info.Text);
                             if (!isGenericWithNoText)
                             {
-                                isAnyTileHovered = true;
-                                break;
+                                hoveredRoomName = info.Id;
+                                RenderRoomCards(panel, typeColors, tilePositions, hoveredRoomName);
+                                RenderMedallionCards(panel);
+                                return;
                             }
                         }
                     }
@@ -571,7 +581,7 @@ namespace IncursionHelper
                     
                     info.IsUpgradeTarget = upgradeColor.HasValue;
                     
-                    var tileRect = DrawTileOverlay(tile, info, upgradeColor, isAnyTileHovered);
+                    var tileRect = DrawTileOverlay(tile, info, upgradeColor);
 
                     if (info.IsUpgradeTarget && tileRect != RectangleF.Empty)
                     {
@@ -584,7 +594,7 @@ namespace IncursionHelper
                 }
             }
 
-            RenderRoomCards(panel, typeColors, tilePositions, isAnyTileHovered);
+            RenderRoomCards(panel, typeColors, tilePositions, hoveredRoomName);
             RenderMedallionCards(panel);
         }
 
@@ -727,7 +737,7 @@ namespace IncursionHelper
             return (typeColors, targetColors);
         }
 
-        private void RenderRoomCards(Element panel, Dictionary<string, Color> typeColors, Dictionary<string, List<Vector2>> tilePositions, bool isAnyTileHovered)
+        private void RenderRoomCards(Element panel, Dictionary<string, Color> typeColors, Dictionary<string, List<Vector2>> tilePositions, string hoveredRoomName)
         {
             if (panel.Children.Count <= 9) return;
             var containerL1 = panel.Children[9];
@@ -797,9 +807,9 @@ namespace IncursionHelper
                 float totalHeight = 0;
                 foreach (var line in linesToDraw)
                 {
-                    totalHeight += Graphics.MeasureText(line.Text).Y + 2;
+                    totalHeight += Graphics.MeasureText(line.Text).Y + 6;
                 }
-                totalHeight -= 2;
+                totalHeight -= 6;
 
                 var startY = cardRect.Center.Y - (totalHeight / 2);
                 var startX = cardRect.Right + 10;
@@ -812,20 +822,34 @@ namespace IncursionHelper
                     
                     Graphics.DrawBox(bgRect, Color.Black);
                     Graphics.DrawText(line.Text, drawPos, line.Color);
-                    
-                    if (Settings.ShowUpgradeLines && !isAnyTileHovered && line.TargetId != null)
+
+                    if (!string.IsNullOrEmpty(hoveredRoomName) && line.TargetId == hoveredRoomName)
                     {
-                        if (tilePositions.TryGetValue(line.TargetId, out var positions))
+                        Graphics.DrawFrame(bgRect, Color.Yellow, 2);
+                    }
+                    
+                    if (Settings.ShowUpgradeLines && line.TargetId != null)
+                    {
+                        bool shouldDrawLines = true;
+                        if (Settings.AutoHideOnHover.Value && !string.IsNullOrEmpty(hoveredRoomName))
                         {
-                            var startPoint = new Vector2(bgRect.Right, bgRect.Center.Y);
-                            foreach (var endPoint in positions)
+                            shouldDrawLines = false;
+                        }
+
+                        if (shouldDrawLines)
+                        {
+                            if (tilePositions.TryGetValue(line.TargetId, out var positions))
                             {
-                                Graphics.DrawLine(startPoint, endPoint, 2, Color.FromArgb(150, line.Color));
+                                var startPoint = new Vector2(bgRect.Right, bgRect.Center.Y);
+                                foreach (var endPoint in positions)
+                                {
+                                    DrawCurve(startPoint, endPoint, 0, 2, Color.FromArgb(150, line.Color));
+                                }
                             }
                         }
                     }
 
-                    startY += textSize.Y + 2;
+                    startY += textSize.Y + 6;
                 }
             }
         }
@@ -849,7 +873,7 @@ namespace IncursionHelper
             }
         }
 
-        private RectangleF DrawTileOverlay(Element tile, TileOverlayInfo info, Color? upgradeColor, bool isAnyTileHovered)
+        private RectangleF DrawTileOverlay(Element tile, TileOverlayInfo info, Color? upgradeColor)
         {
             var isGeneric = info.Color == Color.LightGray;
 
@@ -866,12 +890,8 @@ namespace IncursionHelper
             var drawPos = new Vector2(center.X - textSize.X / 2, rect.Bottom - 15);
             
             var bgRect = new RectangleF(drawPos.X - 2, drawPos.Y - 2, textSize.X + 4, textSize.Y + 4);
-            
-            if (!isAnyTileHovered)
-            {
-                Graphics.DrawBox(bgRect, Color.Black);
-                Graphics.DrawText(displayText, drawPos, displayColor);
-            }
+            Graphics.DrawBox(bgRect, Color.Black);
+            Graphics.DrawText(displayText, drawPos, displayColor);
 
             return bgRect;
         }
@@ -953,6 +973,48 @@ namespace IncursionHelper
             if (dir.Length() <= radius * 2) return;
             var norm = Vector2.Normalize(dir);
             Graphics.DrawLine(p1 + norm * radius, p2 - norm * radius, thickness, color);
+        }
+
+        private void DrawCurve(Vector2 p1, Vector2 p2, float radius, int thickness, Color color, Vector2? center = null, int segments = 20)
+        {
+            var dir = p2 - p1;
+            if (dir.Length() <= radius * 2)
+            {
+                DrawLineEdgeToEdge(p1, p2, radius, thickness, color);
+                return;
+            }
+
+            var start = p1 + Vector2.Normalize(dir) * radius;
+            var end = p2 - Vector2.Normalize(dir) * radius;
+
+            var distance = Vector2.Distance(start, end);
+            
+            Vector2 offsetDir;
+            if (center.HasValue)
+            {
+                var mid = (start + end) / 2;
+                var fromCenter = mid - center.Value;
+                offsetDir = fromCenter != Vector2.Zero ? Vector2.Normalize(fromCenter) : Vector2.Zero;
+            }
+            else
+            {
+                var perpendicular = new Vector2(-dir.Y, dir.X);
+                offsetDir = Vector2.Normalize(perpendicular);
+            }
+
+            var controlPoint = (start + end) / 2 + offsetDir * (distance * Settings.ArcMultiplier.Value);
+
+            Vector2 prevPoint = start;
+            for (int i = 1; i <= segments; i++)
+            {
+                float t = i / (float)segments;
+                float u = 1 - t;
+                float tt = t * t;
+                float uu = u * u;
+                Vector2 point = uu * start + 2 * u * t * controlPoint + tt * end;
+                Graphics.DrawLine(prevPoint, point, thickness, color);
+                prevPoint = point;
+            }
         }
 
         private void DrawSmoothCircle(Vector2 center, float radius, Color color, int thickness)
