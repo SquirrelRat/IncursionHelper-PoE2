@@ -100,71 +100,74 @@ namespace IncursionHelper
         #region Mappings
         private static readonly Dictionary<string, RewardInfo> _rewardMapping = new()
         {
-            { "ExtractAllSocketables", new RewardInfo { Title = "Extraction", Description = "Return Augments (Destroy Item)" } },
-            { "WeaponOrArmourQualityLow", new RewardInfo { Title = "Forging Bench", Description = "Improve Quality" } },
-            { "WeaponOrArmourQualityMid", new RewardInfo { Title = "Forging Bench", Description = "Greatly Improve Quality" } },
+            { "ExtractAllSocketables", new RewardInfo { Title = "Extraction", Description = "Return Augments/Cores (Destroy Item)" } },
+            { "WeaponOrArmourQualityLow", new RewardInfo { Title = "Forging Workbench", Description = "Improve Quality" } },
+            { "WeaponOrArmourQualityMid", new RewardInfo { Title = "Forging Workbench", Description = "Greatly Improve Quality" } },
             { "WeaponOrArmourQualityHigh", new RewardInfo { Title = "Masterwork Forge", Description = "Quality >20% (Risk Corrupt)" } },
             { "WeaponOrArmourQualityHighMultiple", new RewardInfo { Title = "Triumphant Forge", Description = "Quality >20% (Risk Corrupt)" } },
+            { "ForgingMechanism", new RewardInfo { Title = "Forging Mechanism", Description = "Add Augment Socket" } },
             { "GemQualityLow", new RewardInfo { Title = "Gemcutter", Description = "Improve Gem Quality" } },
-            { "GemQualityMid", new RewardInfo { Title = "Gemcutter", Description = "Greatly Improve Gem Quality" } },
-            { "DoubleCorruptGem", new RewardInfo { Title = "Gem Corrupter", Description = "Modify/Destroy Corrupted Gem" } },
+            { "GemQualityMid", new RewardInfo { Title = "Gemcutting Mechanism", Description = "Greatly Improve Gem Quality" } },
+            { "GemSockets", new RewardInfo { Title = "Gemcutting Workbench", Description = "3 Support Sockets" } },
+            { "DoubleCorruptGem", new RewardInfo { Title = "Gem Corrupter", Description = "Modify Corrupted Gem" } },
             { "CorruptTablet", new RewardInfo { Title = "Precursor Machine", Description = "Modify Tablet (Chance Destroy)" } },
             { "MutateUnique", new RewardInfo { Title = "Morphology", Description = "Reroll Corrupted Unique Mods" } },
             { "ModifySoulcore", new RewardInfo { Title = "Soul Core Infuser", Description = "Modify Soul Core (Chance Destroy)" } },
-            { "ModifySoulcoreAlchemyLab", new RewardInfo { Title = "Alchemy Bench", Description = "Normal/Magic -> Rare" } },
+            { "ModifySoulcoreAlchemyLab", new RewardInfo { Title = "Alchemy Workbench", Description = "Normal/Magic -> Rare (4 Mods)" } },
             { "Doctor", new RewardInfo { Title = "Corruption Altar", Description = "Corrupt Item (Unpredictable)" } },
-            { "CampaignCurrency", new RewardInfo { Title = "Exalted Bench", Description = "Augment Rare Item" } },
-            { "Regal", new RewardInfo { Title = "Regal Bench", Description = "Magic -> Rare" } }
+            { "CampaignCurrency", new RewardInfo { Title = "Exalted Workbench", Description = "Augment Rare Item" } },
+            { "Regal", new RewardInfo { Title = "Regal Workbench", Description = "Magic -> Rare (+1 Mod)" } },
+            { "CorruptionInstiller", new RewardInfo { Title = "Corruption Instiller", Description = "Modify Corrupted Equip/Jewel" } }
         };
 
         private record RoomDef(string Name, string Type, string Overlay, Color Color, bool IsMaxTier = false);
 
         private static readonly List<RoomDef> _roomDefinitions = new()
         {
-            new("Crimson Hall", "Corruption Chamber", "Corrupt", Color.Red),
-            new("Catalyst of Corruption", "Corruption Chamber", "Corrupt", Color.Red),
-            new("Locus of Corruption", "Corruption Chamber", "Corrupt", Color.Red, true),
+            new("Crimson Hall", "Corruption Chamber", "Item Corrupt", Color.Red),
+            new("Catalyst of Corruption", "Corruption Chamber", "Item Corrupt", Color.Red),
+            new("Locus of Corruption", "Corruption Chamber", "Double Corrupt", Color.Red, true),
             
-            new("Thaumaturge's Laboratory", "Thaumaturge", "3-Link Gem", Color.Red),
+            new("Thaumaturge's Laboratory", "Thaumaturge", "3 Support Sockets", Color.Red),
             new("Thaumaturge's Cuttery", "Thaumaturge", "Gem Quality", Color.Red),
             new("Thaumaturge's Cathedral", "Thaumaturge", "Gem Corrupt", Color.Red, true),
 
-            new("Chamber of Souls", "Alchemy Lab", "Rarity + Medallion", Color.Red),
-            new("Core Machinarium", "Alchemy Lab", "Rarity + Medallion", Color.Red),
+            new("Chamber of Souls", "Alchemy Lab", "Soul Core / Rarity", Color.Red),
+            new("Core Machinarium", "Alchemy Lab", "Soul Core / Rarity", Color.Red),
             new("Grand Phylactory", "Alchemy Lab", "Corrupt Soul Core", Color.Red, true),
 
             new("Tablet Research Vault", "Tablets Vault", "Tablet Corrupt", Color.Red),
             
             new("Altar of Sacrifice", "Sacrificial Chamber", "Unique Item", Color.Orange),
             new("Hall of Offerings", "Sacrificial Chamber", "Unique Item", Color.Orange),
-            new("Apex of Oblation", "Sacrificial Chamber", "Unique Item", Color.Orange, true),
+            new("Apex of Oblation", "Sacrificial Chamber", "Vaal Unique Mod", Color.Orange, true),
             new("Ancient Reliquary Vault", "Uniques Vault", "Unique Item", Color.Orange),
             
             new("Kishara's Vault", "Currency Vault", "Currency", Color.Gold),
             new("Jiquani's Vault", "Augments Vault", "High Lvl Rune", Color.Cyan),
             new("Vault of Reverence", "Lineage Gems Vault", "Lineage Gem", Color.Cyan),
             
-            new("Commander's Chamber", "Commander", "Uromoti", Color.Wheat),
-            new("Commander's Hall", "Commander", "Uromoti", Color.Wheat),
-            new("Commander's Headquarters", "Commander", "Uromoti", Color.Wheat, true),
+            new("Commander's Chamber", "Commander", "Uromoti Medallion", Color.Wheat),
+            new("Commander's Hall", "Commander", "Uromoti Medallion", Color.Wheat),
+            new("Commander's Headquarters", "Commander", "Uromoti Medallion", Color.Wheat, true),
             
-            new("Spymaster's Study", "Spymaster", "Juatalotli", Color.Wheat),
-            new("Hall of Shadows", "Spymaster", "Juatalotli", Color.Wheat),
-            new("Omnipresent Panopticon", "Spymaster", "Juatalotli", Color.Wheat, true),
+            new("Spymaster's Study", "Spymaster", "Juatalotli Medallion", Color.Wheat),
+            new("Hall of Shadows", "Spymaster", "Juatalotli Medallion", Color.Wheat),
+            new("Omnipresent Panopticon", "Spymaster", "Juatalotli Medallion", Color.Wheat, true),
             
-            new("Workshop", "Golem Works", "Quipolatl", Color.Wheat),
-            new("Automaton Lab", "Golem Works", "Quipolatl", Color.Wheat),
-            new("Stone Legion", "Golem Works", "Quipolatl", Color.Wheat, true),
+            new("Workshop", "Golem Works", "Quipolatl Medallion", Color.Wheat),
+            new("Automaton Lab", "Golem Works", "Quipolatl Medallion", Color.Wheat),
+            new("Stone Legion", "Golem Works", "Quipolatl Medallion", Color.Wheat, true),
             
             new("Architect's Chamber", "Architect's Chamber", "Xopec/Azcapa", Color.Wheat),
 
             new("Bronzeworks", "Smithy", "Quality Bench", Color.LightGray),
-            new("Chamber of Iron", "Smithy", "Socket Bench", Color.LightGray),
+            new("Chamber of Iron", "Smithy", "Augment Socket", Color.LightGray),
             new("Golden Forge", "Smithy", "Quality >20%", Color.LightGray, true),
             
-            new("Dynamo", "Generator", "Power/Bench", Color.LightGray),
-            new("Shrine of Empowerment", "Generator", "Power/Bench", Color.LightGray),
-            new("Solar Nexus", "Generator", "Power/Bench", Color.LightGray, true),
+            new("Dynamo", "Generator", "Power Nearby", Color.LightGray),
+            new("Shrine of Empowerment", "Generator", "Power Nearby", Color.LightGray),
+            new("Solar Nexus", "Generator", "Power Nearby", Color.LightGray, true),
             
             new("Surgeon's Ward", "Flesh Surgeon", "Limb Mod", Color.LightGray),
             new("Surgeon's Theatre", "Flesh Surgeon", "Limb Mod", Color.LightGray),
@@ -174,9 +177,9 @@ namespace IncursionHelper
             
             new("Royal Access Chamber", "Royal Access Chamber", "Access Atziri", Color.Magenta),
             new("Atziri's Chamber", "Atziri's Chamber", "Atziri", Color.Magenta),
-            new("Sacrifice Room", "Sacrifice Room", "Sacrifice Room", Color.Magenta),
+            new("Sacrifice Room", "Sacrifice Room", "Upgrade Room", Color.Magenta),
 
-            new("Path", "Path", "", Color.LightGray),
+            new("Path", "Path", "Chests", Color.LightGray),
             new("Guardhouse", "Garrison", "Equip Mod", Color.LightGray),
             new("Barracks", "Garrison", "Equip Mod", Color.LightGray),
             new("Hall of War", "Garrison", "Equip Mod", Color.LightGray, true),
@@ -185,9 +188,9 @@ namespace IncursionHelper
             new("Arsenal", "Armoury", "Equipment", Color.LightGray),
             new("Gallery", "Armoury", "Equipment", Color.LightGray, true),
             
-            new("Prosthetic Research", "Synthflesh Lab", "Experience", Color.LightGray),
-            new("Synthflesh Sanctum", "Synthflesh Lab", "Experience", Color.LightGray),
-            new("Crucible of Transcendence", "Synthflesh Lab", "Experience", Color.LightGray, true),
+            new("Prosthetic Research", "Synthflesh Lab", "Exp Bonus", Color.LightGray),
+            new("Synthflesh Sanctum", "Synthflesh Lab", "Exp Bonus", Color.LightGray),
+            new("Crucible of Transcendence", "Synthflesh Lab", "Exp Bonus", Color.LightGray, true),
             
             new("Viper's Loyals", "Legion Barracks", "Rare Monsters", Color.LightGray),
             new("Elite Legion", "Legion Barracks", "Rare Monsters", Color.LightGray, true),
